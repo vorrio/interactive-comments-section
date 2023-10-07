@@ -1,0 +1,248 @@
+:root {
+	--clr-moderate-blue: hsl(238, 40%, 52%); /*tag edit reply*/
+	--clr-soft-red: hsl(358, 79%, 66%); /*delete*/
+	--clr-light-grayish-blue: hsl(239, 57%, 85%); /*hover*/
+	--clr-pale-red: hsl(357, 100%, 86%); /*hover*/
+
+	--clr-text1: hsl(212, 24%, 26%); /*name*/
+	--clr-text2: hsl(211, 10%, 45%); /*text*/
+	--clr-input-border: hsl(223, 19%, 93%); /*input border*/
+	--clr-bg: hsl(228, 33%, 97%); /*background like-bg*/
+	--clr-white: hsl(0, 0%, 100%); /*button-text comment-bg*/
+}
+
+*,
+*::after,
+*::before {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+	font-family: inherit;
+}
+
+body {
+	font-family: 'Rubik', sans-serif;
+}
+
+.chat-section {
+	display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr auto;
+  height: 100vh;
+	padding: 0 16px 32px 16px;
+	background-color: var(--clr-bg);
+}
+
+/*
+ * #COMMENTS
+ */
+
+.comments {
+	overflow-y: scroll;
+	display: grid;
+	gap: 16px;
+	padding-block: 16px;
+}
+
+.comment-replies-group {
+	display: grid;
+}
+
+.replies {
+	display: grid;
+	grid-template-columns: auto 1fr;
+}
+
+.replies-thread-line {
+	width: 2px;
+	background-color: var(--clr-input-border);
+	margin-right: 16px;
+}
+
+.replies-comments {
+	display: grid;
+	gap: 16px;
+}
+.replies-comments .comment:first-child {
+	margin-top: 16px;
+}
+
+
+
+.comment {
+	display: flex;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	padding: 16px;
+	background-color: var(--clr-white);
+	border-radius: 8px;
+	gap: 12px;
+}
+
+.comment-header {
+	width: 100%;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px;
+}
+.sender-img {
+	height: 32px;
+	aspect-ratio: 1/1;
+}
+.sender-name {
+	font-size: 1rem;
+	font-weight: 500;
+	color: var(--clr-text1);
+}
+.you {
+	display: inline-block;
+	background-color: var(--clr-moderate-blue);
+	border-radius: 2px;
+	padding: 0 4px;
+	color: var(--clr-white);
+	font-size: .75rem;
+	line-height: 1rem;
+}
+.date {
+	font-size: 1rem;
+	font-weight: 400;
+	color: var(--clr-text2);
+}
+
+.comment-content {
+	width: 100%;
+	font-size: 1rem;
+	font-weight: 400;
+	color: var(--clr-text2);
+}
+.reply-to {
+	color: var(--clr-moderate-blue);
+	font-weight: 500;
+}
+.reply-to::before {
+	content: "@";
+}
+
+.vote {
+	display: flex;
+	align-items: center;
+	justify-content: space-evenly;
+	width: fit-content;
+	background-color: var(--clr-bg);
+	border-radius: 8px;
+	width: 100px;
+	height: 40px;
+}
+.btn-vote {
+	background: none;
+	border: none;
+	font-size: 1rem;
+	font-weight: 500;
+	color: var(--clr-light-grayish-blue);
+}
+.comment-score {
+	font-size: 1rem;
+	font-weight: 500;
+	color: var(--clr-moderate-blue);
+}
+
+.comment-tools {
+	width: fit-content;
+	justify-self: end;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 16px;
+}
+.comment-tool {
+	display: flex;
+	gap: 4px;
+	align-items: center;
+	background: none;
+	border: none;
+}
+.tool-text {
+	font-size: 1rem;
+	font-weight: 500;
+}
+.reply, .edit {
+	color: var(--clr-moderate-blue);
+}
+.delete {
+	color: var(--clr-soft-red);
+}
+
+
+.comment .edit-input {
+	display: none;
+}
+.comment .update {
+	display: none;
+}
+
+.comment.editable .edit-input {
+	display: block;
+}
+.comment.editable .update {
+	display: block;
+}
+.comment.editable .comment-content {
+	display: none;
+}
+.comment.editable .delete {
+	display: none;
+}
+.comment.editable .edit {
+	display: none;
+}
+
+
+
+/*
+ * #INPUT-COMMENT
+ */
+
+.send-comment-form {
+	display: grid;
+	gap: 16px;
+	padding: 16px;
+	border-radius: 4px;
+	background-color: var(--clr-white);
+}
+
+.input {
+	border: 1px solid var(--clr-input-border);
+	border-radius: 8px;
+	padding: 8px 16px;
+	min-height: 96px;
+	resize: none;
+	font-size: 1rem;
+	font-weight: 400;
+}
+.input:focus {
+	outline: 1px solid var(--clr-moderate-blue);
+}
+
+.flex-between {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+.inputUserImage {
+	height: 32px;
+	aspect-ratio: 1/1;
+	border-radius: 50%;
+}
+.btn {
+	text-transform: uppercase;
+	height: 48px;
+	padding-inline: 28px;
+	font-size: 1rem;
+	font-weight: 400;
+	color: var(--clr-white);
+	background-color: var(--clr-moderate-blue);
+	border: none;
+	border-radius: 8px;
+}
+
+

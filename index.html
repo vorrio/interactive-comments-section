@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- displays site properly based on user's device -->
+
+  <link rel="icon" type="image/png" sizes="32x32" href="./images/favicon-32x32.png">
+  
+  <title>Interactive comments section</title>
+
+  <link rel="stylesheet" href="./style.css">
+
+	<script src="./app.js" defer></script>
+
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&display=swap" rel="stylesheet">
+
+</head>
+<body>
+  <main>
+		<section class="chat-section">
+
+			<div class="comments">
+
+				<!-- <div class="comment-replies-group">
+
+					<div class="comment">
+						<div class="comment-header">
+							<img class="sender-img" src="./images/avatars/image-ramsesmiron.webp" alt="sender image">
+							<span class="sender">
+								<span class="sender-name">ramsesmiron</span>	
+								<span class="you">you</span></span>
+							<span class="date">1 week ago</span>
+						</div>
+						<p class="comment-content">
+							<span class="reply-to">maxblagun</span>
+							If you're still new, I'd recommend focusing on the fundamentals of HTML, CSS, and JS before considering React. 
+							It's very tempting to jump ahead but lay a solid foundation first.
+						</p>
+						<div class="vote">
+							<button class="btn-vote upvote">+</button>
+							<span class="comment-score">4</span>
+							<button class="btn-vote downvote">-</button>
+						</div>
+						<div class="comment-tools">
+							<div class="comment-tool reply">
+								<svg class="tool-icon" width="14" height="13" xmlns="http://www.w3.org/2000/svg">
+									<path d="M.227 4.316 5.04.16a.657.657 0 0 1 1.085.497v2.189c4.392.05 7.875.93 7.875 5.093 0 1.68-1.082 3.344-2.279 4.214-.373.272-.905-.07-.767-.51 1.24-3.964-.588-5.017-4.829-5.078v2.404c0 .566-.664.86-1.085.496L.227 5.31a.657.657 0 0 1 0-.993Z" 
+									fill="#5357B6"/></svg>
+								<span class="tool-text">Reply</span>
+							</div>
+							<div class="comment-tool delete">
+								<svg width="12" height="14" xmlns="http://www.w3.org/2000/svg">
+									<path d="M1.167 12.448c0 .854.7 1.552 1.555 1.552h6.222c.856 0 1.556-.698 1.556-1.552V3.5H1.167v8.948Zm10.5-11.281H8.75L7.773 0h-3.88l-.976 1.167H0v1.166h11.667V1.167Z" 
+									fill="#ED6368"/></svg>
+								<span class="tool-text">Delete</span>
+							</div>
+							<div class="comment-tool edit">
+								<svg width="14" height="14" xmlns="http://www.w3.org/2000/svg">
+									<path d="M13.479 2.872 11.08.474a1.75 1.75 0 0 0-2.327-.06L.879 8.287a1.75 1.75 0 0 0-.5 1.06l-.375 3.648a.875.875 0 0 0 .875.954h.078l3.65-.333c.399-.04.773-.216 1.058-.499l7.875-7.875a1.68 1.68 0 0 0-.061-2.371Zm-2.975 2.923L8.159 3.449 9.865 1.7l2.389 2.39-1.75 1.706Z" 
+									fill="#5357B6"/></svg>
+								<span class="tool-text">Edit</span>
+							</div>
+						</div>
+					</div>
+	
+					<div class="replies">
+						<div class="replies-thread-line"></div>
+
+						<ul class="replies-comments">
+			
+							<div class="comment">
+								<div class="comment-header">
+									<img class="sender-img" src="./images/avatars/image-ramsesmiron.webp" alt="sender image">
+									<span class="sender">
+										<span class="sender-name">ramsesmiron</span>	
+										<span class="you">you</span></span>
+									<span class="date">1 week ago</span>
+								</div>
+								<p class="comment-content">
+									<span class="reply-to">maxblagun</span>
+									If you're still new, I'd recommend focusing on the fundamentals of HTML, CSS, and JS before considering React. 
+									It's very tempting to jump ahead but lay a solid foundation first.
+								</p>
+								<div class="vote">
+									<button class="btn-vote upvote">+</button>
+									<span class="comment-score">4</span>
+									<button class="btn-vote downvote">-</button>
+								</div>
+								<div class="comment-tools">
+									<div class="comment-tool reply">
+										<svg class="tool-icon" width="14" height="13" xmlns="http://www.w3.org/2000/svg">
+											<path d="M.227 4.316 5.04.16a.657.657 0 0 1 1.085.497v2.189c4.392.05 7.875.93 7.875 5.093 0 1.68-1.082 3.344-2.279 4.214-.373.272-.905-.07-.767-.51 1.24-3.964-.588-5.017-4.829-5.078v2.404c0 .566-.664.86-1.085.496L.227 5.31a.657.657 0 0 1 0-.993Z" 
+											fill="#5357B6"/></svg>
+										<span class="tool-text">Reply</span>
+									</div>
+									<div class="comment-tool delete">
+										<svg width="12" height="14" xmlns="http://www.w3.org/2000/svg">
+											<path d="M1.167 12.448c0 .854.7 1.552 1.555 1.552h6.222c.856 0 1.556-.698 1.556-1.552V3.5H1.167v8.948Zm10.5-11.281H8.75L7.773 0h-3.88l-.976 1.167H0v1.166h11.667V1.167Z" 
+											fill="#ED6368"/></svg>
+										<span class="tool-text">Delete</span>
+									</div>
+									<div class="comment-tool edit">
+										<svg width="14" height="14" xmlns="http://www.w3.org/2000/svg">
+											<path d="M13.479 2.872 11.08.474a1.75 1.75 0 0 0-2.327-.06L.879 8.287a1.75 1.75 0 0 0-.5 1.06l-.375 3.648a.875.875 0 0 0 .875.954h.078l3.65-.333c.399-.04.773-.216 1.058-.499l7.875-7.875a1.68 1.68 0 0 0-.061-2.371Zm-2.975 2.923L8.159 3.449 9.865 1.7l2.389 2.39-1.75 1.706Z" 
+											fill="#5357B6"/></svg>
+										<span class="tool-text">Edit</span>
+									</div>
+								</div>
+							</div>
+
+						</ul>
+					</div>
+
+				</div> -->
+
+			</div>
+
+			<div class="send-comment-form">
+				<textarea class="input comment-input" placeholder="Add a comment..."></textarea>
+				<div class="flex-between">
+					<img class="inputUserImage" src="" alt="user">
+					<button class="btn" onClick="addComment()">send</button>
+				</div>
+			</div>
+
+		</section>
+	</main>
+</body>
+</html>
