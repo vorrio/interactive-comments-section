@@ -242,15 +242,20 @@ main {
 
 
 .form {
+	flex-wrap: wrap;
 	width: 100%;
-	display: grid;
+	display: flex;
 	gap: 16px;
 	padding: 16px;
 	border-radius: 4px;
 	background-color: var(--clr-white);
+	justify-content: space-between;
+	align-items: center	;
 }
 
 .input {
+	width: 100%;
+	
 	border: 1px solid var(--clr-input-border);
 	border-radius: 8px;
 	padding: 8px 16px;
@@ -273,6 +278,7 @@ main {
 	aspect-ratio: 1/1;
 	border-radius: 50%;
 }
+
 .btn {
 	text-transform: uppercase;
 	height: 48px;
@@ -427,6 +433,20 @@ main {
 		margin-inline: 40px;
 	}
 
+	
+	.form {
+		align-items: start;
+	}
+	.input {
+		order: 2;
+		width: auto;
+		flex-grow: 1;
+	}
+	.inputUserImage {
+		order:1
+	}
+	.send-btn{
+		order: 3;
+	}
+
 }
-
-

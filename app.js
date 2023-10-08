@@ -1,7 +1,5 @@
 "use strict";
 
-localStorage.clear()
-
 let lastCommentId = 0;
 let currentUser;
 let comments;
@@ -74,6 +72,12 @@ const editComment = (id) => {
 	document.querySelector(`#comment${id} .edit-input`).focus()
 }
 const replyComment = (id) => {
+	if (document.querySelector(`#form${id}`)) {
+		document.querySelector(`#form${id}`).remove();
+		document.querySelector(`#comment${id} .reply .tool-text`).innerHTML = "Reply";
+		return;
+	};
+
 	if (document.querySelector(".reply-input") !== null) document.querySelector(".reply-input").parentElement.remove();
 
 	if (document.querySelector(`#comment${id}`).parentElement.classList.contains("replies-comments")) {
@@ -84,6 +88,9 @@ const replyComment = (id) => {
 	document.querySelector(`#input${id}`).focus()
 
 	document.querySelector(".inputUserImage").src = currentUser.image.webp;
+
+	document.querySelector(`#comment${id} .reply .tool-text`).innerHTML = "Cancel";
+
 }
 const upvoteComment = (id) => {
 	if (voted.includes(id)) return;
@@ -174,6 +181,15 @@ const update = (id) => {
 
 }
 const addReplyComment = (id) => {
+
+	if (document.querySelector(`#input${id}`).value === "") {
+		document.querySelector(`#form${id}`).remove();
+		document.querySelector(`#comment${id} .reply .tool-text`).innerHTML = "Reply";
+		return;
+	};
+
+	document.querySelector(`#comment${id} .reply .tool-text`).innerHTML = "Reply";
+
 	const replyingTo = document.querySelector(`#comment${id} .sender-name`).innerHTML;
 	const content = document.querySelector(`#input${id}`).value;
 	lastCommentId++
@@ -216,6 +232,7 @@ const addReplyComment = (id) => {
 	document.querySelector(`#form${id}`).remove();
 }	
 const addComment = () => {
+	if (document.querySelector(`.comment-input`).value === "") return;
 	const content = document.querySelector(`.comment-input`).value;
 	lastCommentId++
 	const commentObject = {
@@ -243,10 +260,8 @@ const addComment = () => {
 const createReplyForm = (id) => `
 <div class="form send-reply-form" id="form${id}">
 	<textarea class="input reply-input" id="input${id}" placeholder="Add a comment..." name="reply input"></textarea>
-	<div class="flex-between">
-		<img class="inputUserImage" src="" alt="user">
-		<button class="btn" onClick="addReplyComment(${id})">send</button>
-	</div>
+	<img class="inputUserImage" src="" alt="user">
+	<button class="btn send-btn" onClick="addReplyComment(${id})">send</button>
 </div>
 `
 
