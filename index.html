@@ -21,7 +21,12 @@
   <main>
 		<section class="chat-section">
 
+			<div class="comments-container">
+
+			
 			<div class="comments">
+
+
 
 				<!-- <div class="comment-replies-group">
 
@@ -117,15 +122,35 @@
 
 			</div>
 
-			<div class="send-comment-form">
-				<textarea class="input comment-input" placeholder="Add a comment..."></textarea>
-				<div class="flex-between">
-					<img class="inputUserImage" src="" alt="user">
-					<button class="btn" onClick="addComment()">send</button>
+		</div>
+
+			<div class="main-input-container">
+				<div class="main-input-group">
+					<div class="form send-comment-form">
+						<textarea class="input comment-input" placeholder="Add a comment..." name="comment input"></textarea>
+						<div class="flex-between">
+							<img class="inputUserImage" src="" alt="user">
+							<button class="btn" onClick="addComment()">send</button>
+						</div>
+					</div>
 				</div>
 			</div>
-
+		
 		</section>
 	</main>
+
+	
+	<div class="modal-container">
+		<div class="overlay"></div>
+		<div class="modal">
+			<h1 class="modal-header">Delete comment</h1>
+			<p class="modal-text">Are you sure want to delete this comment? This will remove the comment and can't be undone.</p>
+			<div class="buttons">
+				<button class="btn no-cancel">no, cancel</button>
+				<button class="btn yes-delete">yes, delete</button>
+			</div>
+		</div>
+	</div>
+
 </body>
 </html>
