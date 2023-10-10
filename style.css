@@ -55,10 +55,7 @@ main {
 
 	overflow-y: scroll;
 	padding-bottom: 16px;
-	/* display: flex;
-  justify-content: flex-end;
-  flex-direction: column; */
-	
+	scroll-behavior: smooth;
 }
 
 .comment-replies-group {
@@ -110,13 +107,13 @@ main {
 	color: var(--clr-text1);
 }
 .you {
-	display: inline-block;
 	background-color: var(--clr-moderate-blue);
 	border-radius: 2px;
 	padding: 0 4px;
 	color: var(--clr-white);
 	font-size: .75rem;
 	line-height: 1rem;
+	margin-top: 0.125rem;
 }
 .date {
 	font-size: 1rem;
@@ -130,7 +127,16 @@ main {
 	font-size: 1rem;
 	font-weight: 400;
 	color: var(--clr-text2);
+} 
+.comment-content.active {
+	outline: 1px solid var(--clr-moderate-blue);
+	border-radius: 8px;
+	padding: 8px 16px;
 }
+.comment-text[contenteditable="true"]{
+	outline: none;
+}
+
 .reply-to {
 	color: var(--clr-moderate-blue);
 	font-weight: 500;
@@ -195,6 +201,11 @@ main {
 .tool-text {
 	font-size: 1rem;
 	font-weight: 500;
+	pointer-events: none;
+	caret-color: transparent;
+}
+.tool-icon {
+	pointer-events: none;
 }
 .reply, .edit {
 	color: var(--clr-moderate-blue);
@@ -208,21 +219,6 @@ main {
 }
 .delete:hover {
 	color: var(--clr-pale-red);
-}
-
-
-
-.comment .edit-input,
-.comment .update {
-	display: none;
-}
-
-.comment.editable .edit-input,
-.comment.editable .update {
-	display: block;
-}
-.comment.editable .comment-content{
-	display: none;
 }
 
 /*

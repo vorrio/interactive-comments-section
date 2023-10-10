@@ -1,17 +1,15 @@
 "use strict";
 
-let lastCommentId = 0;
 let currentUser;
-let comments;
+let comments = new Map();
 let voted = [];
 
 const commentsElement = document.querySelector(".comments");
 
-const overlay = document.querySelector(".overlay");
 const modalContainer = document.querySelector(".modal-container");
+const overlay = document.querySelector(".overlay");
 const btnCancel = document.querySelector(".no-cancel");
 const btnApprove = document.querySelector(".yes-delete");
-
 btnCancel.addEventListener("click", () => {
 	modalContainer.classList.remove("active");
 });
@@ -20,320 +18,397 @@ overlay.addEventListener("click", () => {
 });
 btnApprove.addEventListener("click", (evt) => {
 	modalContainer.classList.remove("active");
-	deleteComment(evt.currentTarget.commentId);
+	deleteComment(evt.currentTarget.comment);
 });
-
-const deleteComment = (id) => {
-	if (document.querySelector(`#comment${id}`).parentElement.classList.contains("replies-comments")) {
-		
-		for (let i = comments.length - 1; i >= 0; i--) {
-			if(comments[i].replies.length !== 0) {
-				for (let j = comments[i].replies.length - 1; j >= 0; j--) {
-					if (comments[i].replies[j].id === id) {
-						comments[i].replies.splice(j, 1);
-						localStorage.setItem("comments", JSON.stringify(comments));
-					}
-				}
-			}
-		}
+const deleteComment = (targetComment) => {
+	const targetCommentGroup = targetComment.closest('.comment-replies-group');
+	const commentGroupObj = comments.get(targetCommentGroup.id);
+	const targetId = parseInt(targetComment.id.substring(8));
+	if (commentGroupObj.id === targetId) {
+		comments.delete(targetCommentGroup.id);
 	} else {
-		for (let i = comments.length - 1; i >= 0; i--) {
-			if (comments[i].id === id) {
-				comments.splice(i, 1);
-				localStorage.setItem("comments", JSON.stringify(comments));
-			}
-		}
+		const targetIndex = commentGroupObj.replies.findIndex(obj => obj.id === targetId);
+		commentGroupObj.replies.splice(targetIndex, 1);
 	}
+	localStorage.setItem("comments", JSON.stringify(Array.from(comments.entries())));
 
-	document.querySelector(`#comment${id}`).remove();
+	targetComment.remove();
 }
-const showDeleteModal = (id) => {
-
-	btnApprove.commentId = id;
-
+const showDeleteModal = (targetComment) => {
+	btnApprove.comment = targetComment;
 	modalContainer.classList.add("active");	
-
 }
-const editComment = (id) => {
-	if (document.querySelector(`#comment${id}`).classList.contains("editable")) {
-		document.querySelector(`#comment${id} .edit .tool-text`).innerHTML = "Edit"
-		document.querySelector(`#comment${id}`).classList.remove("editable");
-		return;
-	}
 
-	if (document.querySelector(".comment.editable") !== null) {
-		document.querySelector(".comment.editable .edit .tool-text").innerHTML = "Edit"
-		document.querySelector(".comment.editable").classList.remove("editable")
-	};
 
-	document.querySelector(`#comment${id} .edit .tool-text`).innerHTML = "Cancel"
-	document.querySelector(`#comment${id}`).classList.add("editable");
-	document.querySelector(`#comment${id} .edit-input`).value = document.querySelector(`#comment${id} .comment-text`).innerHTML;
-	document.querySelector(`#comment${id} .edit-input`).focus()
-}
-const replyComment = (id) => {
-	if (document.querySelector(`#form${id}`)) {
-		document.querySelector(`#form${id}`).remove();
-		document.querySelector(`#comment${id} .reply .tool-text`).innerHTML = "Reply";
-		return;
-	};
+const upvoteComment = (targetComment) => {
+	if (voted.includes(targetComment.id)) return;
+	voted.push(targetComment.id);
 
-	if (document.querySelector(".reply-input") !== null) document.querySelector(".reply-input").parentElement.remove();
+	const scoreElement = targetComment.querySelector(`.comment-score`);
+	const newScore = parseInt(scoreElement.textContent) + 1;
+	scoreElement.textContent = newScore;
 
-	if (document.querySelector(`#comment${id}`).parentElement.classList.contains("replies-comments")) {
-		document.querySelector(`#comment${id}`).insertAdjacentHTML('afterend', createReplyForm(id));
+	const targetCommentGroup = targetComment.closest('.comment-replies-group');
+	const commentGroupObj = comments.get(targetCommentGroup.id);
+	const targetId = parseInt(targetComment.id.substring(8));
+	if (commentGroupObj.id === targetId) {
+		commentGroupObj.score = newScore;
 	} else {
-		document.querySelector(`#group${id} .replies-comments`).insertAdjacentHTML('afterbegin', createReplyForm(id));
+		commentGroupObj.replies.find(obj => obj.id === targetId).score = newScore;
 	}
-	document.querySelector(`#input${id}`).focus()
-
-	document.querySelector(".inputUserImage").src = currentUser.image.webp;
-
-	document.querySelector(`#comment${id} .reply .tool-text`).innerHTML = "Cancel";
-
+	localStorage.setItem("comments", JSON.stringify(Array.from(comments.entries())));
 }
-const upvoteComment = (id) => {
-	if (voted.includes(id)) return;
-	voted.push(id)
-
-	const scoreElement = document.querySelector(`#comment${id} .comment-score`);
-	const newScore = parseInt(scoreElement.innerHTML) + 1
-	scoreElement.innerHTML = newScore;
-
-	if (document.querySelector(`#comment${id}`).parentElement.classList.contains("replies-comments")) {
-		for (let i = comments.length - 1; i >= 0; i--) {
-			if(comments[i].replies.length !== 0) {
-				for (let j = comments[i].replies.length - 1; j >= 0; j--) {
-					if (comments[i].replies[j].id === id) {
-						comments[i].replies[j].score = newScore;
-						localStorage.setItem("comments", JSON.stringify(comments));
-					}
-				}
-			}
-		}
-	} else {
-		for (let i = comments.length - 1; i >= 0; i--) {
-			if (comments[i].id === id) {
-				comments[i].score = newScore;
-				localStorage.setItem("comments", JSON.stringify(comments));
-			}
-		}
-	}
-
-}
-const downvoteComment = (id) => {
-	if (!voted.includes(id)) return;
-	voted = voted.filter(item => item !== id);
+const downvoteComment = (targetComment) => {
+	if (!voted.includes(targetComment.id)) return;
+	voted = voted.filter(item => item !== targetComment.id);
 	
-	const scoreElement = document.querySelector(`#comment${id} .comment-score`);
-	const newScore = parseInt(scoreElement.innerHTML) - 1;
-	scoreElement.innerHTML = newScore;
+	const scoreElement = targetComment.querySelector(`.comment-score`);
+	const newScore = parseInt(scoreElement.textContent) - 1;
+	scoreElement.textContent = newScore;
 
-	if (document.querySelector(`#comment${id}`).parentElement.classList.contains("replies-comments")) {
-		for (let i = comments.length - 1; i >= 0; i--) {
-			if(comments[i].replies.length !== 0) {
-				for (let j = comments[i].replies.length - 1; j >= 0; j--) {
-					if (comments[i].replies[j].id === id) {
-						comments[i].replies[j].score = newScore;
-						localStorage.setItem("comments", JSON.stringify(comments));
-					}
-				}
-			}
-		}
+	const targetCommentGroup = targetComment.closest('.comment-replies-group');
+	const commentGroupObj = comments.get(targetCommentGroup.id);
+	const targetId = parseInt(targetComment.id.substring(8));
+	if (commentGroupObj.id === targetId) {
+		commentGroupObj.score = newScore;
 	} else {
-		for (let i = comments.length - 1; i >= 0; i--) {
-			if (comments[i].id === id) {
-				comments[i].score = newScore;
-				localStorage.setItem("comments", JSON.stringify(comments));
-			}
-		}
+		commentGroupObj.replies.find(obj => obj.id === targetId).score = newScore;
 	}
+	localStorage.setItem("comments", JSON.stringify(Array.from(comments.entries())));
 
 }
 
-const update = (id) => {
+const editComment = (targetComment) => {
+	const content = targetComment.querySelector('.comment-content');
+	const contentText = content.querySelector('.comment-text');
+	const btnEdit = targetComment.querySelector('.edit .tool-text');
 
-	document.querySelector(`#comment${id} .edit .tool-text`).innerHTML = "Edit"
-
-	document.querySelector(`#comment${id}`).classList.remove("editable");
-	const newValue = document.querySelector(`#comment${id} .edit-input`).value;
-	document.querySelector(`#comment${id} .comment-text`).innerHTML = newValue;
-
-	if (document.querySelector(`#comment${id}`).parentElement.classList.contains("replies-comments")) {
-		for (let i = comments.length - 1; i >= 0; i--) {
-			if(comments[i].replies.length !== 0) {
-				for (let j = comments[i].replies.length - 1; j >= 0; j--) {
-					if (comments[i].replies[j].id === id) {
-						comments[i].replies[j].content = newValue;
-						localStorage.setItem("comments", JSON.stringify(comments));
-					}
-				}
-			}
-		}
-	} else {
-		for (let i = comments.length - 1; i >= 0; i--) {
-			if (comments[i].id === id) {
-				comments[i].content = newValue;
-				localStorage.setItem("comments", JSON.stringify(comments));
-			}
-		}
-	}
-
-}
-const addReplyComment = (id) => {
-
-	if (document.querySelector(`#input${id}`).value === "") {
-		document.querySelector(`#form${id}`).remove();
-		document.querySelector(`#comment${id} .reply .tool-text`).innerHTML = "Reply";
+	if (btnEdit.textContent === "Cancel") {
+		btnEdit.textContent = "Edit";
+		content.classList.remove('active');
+		content.contentEditable = false;
+		targetComment.querySelector('.update').remove();
 		return;
-	};
+	}
 
-	document.querySelector(`#comment${id} .reply .tool-text`).innerHTML = "Reply";
+	btnEdit.textContent = "Cancel";
 
-	const replyingTo = document.querySelector(`#comment${id} .sender-name`).innerHTML;
-	const content = document.querySelector(`#input${id}`).value;
-	lastCommentId++
+	const btnUpdate = document.createElement('button');
+	btnUpdate.classList.add('btn', 'update');
+	btnUpdate.textContent = "update";
+	targetComment.querySelector('.comment-tools').insertAdjacentElement('beforebegin', btnUpdate);
+	
+	contentText.contentEditable = true;
+	contentText.focus();
+	content.classList.add('active');
+
+}
+const update = (targetComment, btn) => {
+	const content = targetComment.querySelector('.comment-content');
+	const newContentText = content.querySelector('.comment-text').textContent;
+
+	targetComment.querySelector('.edit .tool-text').textContent = "Edit";
+	targetComment.querySelector('.update').remove();
+	content.classList.remove('active');
+	content.contentEditable = false;
+
+	const targetCommentGroup = targetComment.closest('.comment-replies-group');
+	const commentGroupObj = comments.get(targetCommentGroup.id);
+	const targetId = parseInt(targetComment.id.substring(8));
+	if (commentGroupObj.id === targetId) {
+		commentGroupObj.content = newContentText;
+	} else {
+		commentGroupObj.replies.find(obj => obj.id === targetId).content = newContentText;
+	}
+
+	localStorage.setItem("comments", JSON.stringify(Array.from(comments.entries())));
+
+}
+
+
+let replyFormComment = null;
+let replyForm = null;
+const replyComment = (targetComment) => {
+
+const editBtnText = targetComment.querySelector('.reply .tool-text');
+
+	if(replyForm) {
+		const nextElement = targetComment.nextElementSibling;
+		if(replyFormComment === targetComment) {
+			editBtnText.textContent = "Reply";
+			replyForm.remove();
+			replyFormComment = null;
+			replyForm = null;
+			return;
+		} 
+		replyFormComment.querySelector('.reply .tool-text').textContent = "Reply";
+		replyForm.remove();
+	}
+
+	replyForm = createReplyForm(targetComment);
+	replyFormComment = targetComment;
+
+	/* to reply */
+	if (targetComment.parentElement.classList.contains("replies-comments")) {
+		targetComment.insertAdjacentElement('afterend', replyForm);
+	/* to main comment */
+	} else {
+		targetComment.nextElementSibling.querySelector('.replies-comments').insertAdjacentElement('afterbegin', replyForm);
+	}
+	replyForm.focus();
+
+	editBtnText.textContent = "Cancel";
+
+}
+const addReplyComment = (targetComment, form, content) => {
+
+	const replyingTo = targetComment.querySelector(`.sender-name`).textContent;
+	const commentId = generateCommentId();
+
 	const commentObject = {
-		id: lastCommentId,
+		id: commentId,
 		content: content,
 		createdAt: "now",
 		score: 0,
 		replyingTo: replyingTo,
 		user: currentUser
-	}
-	
-	const newReply = createComment(commentObject, true, "reply");
+	};
 
-	if (document.querySelector(`#comment${id}`).parentElement.classList.contains("replies-comments")) {
-		document.querySelector(`#comment${id}`).parentElement.innerHTML += newReply;
+	form.parentElement.appendChild(createComment(commentObject, true, "reply"));
+	form.remove();
 
-		for (let i = comments.length - 1; i >= 0; i--) {
-			if(comments[i].replies.length !== 0) {
-				for (let j = comments[i].replies.length - 1; j >= 0; j--) {
-					if (comments[i].replies[j].id === id) {
-						comments[i].replies.push(commentObject);
-						localStorage.setItem("comments", JSON.stringify(comments));
-					}
-				}
-			}
-		}
+	const groupOgj = comments.get(targetComment.closest('.comment-replies-group').id);
+	console.log(targetComment.closest('.comment-replies-group').id);
+	groupOgj.replies.push(commentObject);
+	localStorage.setItem("comments", JSON.stringify(Array.from(comments.entries())));
 
-	} else {
-		document.querySelector(`#group${id} .replies-comments`).innerHTML += newReply;
-		
-		for (let i = comments.length - 1; i >= 0; i--) {
-			if (comments[i].id === id) {
-				comments[i].replies.push(commentObject);
-				localStorage.setItem("comments", JSON.stringify(comments));
-			}
-		}
-
-	}
-	document.querySelector(`#form${id}`).remove();
 }	
+
+
+commentsElement.addEventListener('click',  (event) => {
+		if (event.target.classList.contains('reply')) {
+			replyComment(event.target.closest('.comment'));
+		}  else if (event.target.classList.contains('edit')) {
+			editComment(event.target.closest('.comment'));
+		} else if(event.target.classList.contains('delete')) {
+			showDeleteModal(event.target.closest('.comment'));
+		} else if (event.target.classList.contains('update')) {
+			update(event.target.closest('.comment'));
+		} else if (event.target.classList.contains('upvote')) {
+			upvoteComment(event.target.closest('.comment'));
+		} else if(event.target.classList.contains('downvote')) {
+			downvoteComment(event.target.closest('.comment'));
+		}
+})
+
+
+const commentInputForm = document.querySelector('.send-comment-form');
+const commentInput = commentInputForm.querySelector('.comment-input');
 const addComment = () => {
-	if (document.querySelector(`.comment-input`).value === "") return;
-	const content = document.querySelector(`.comment-input`).value;
-	lastCommentId++
+	if (commentInput.value === "") return;
+
+	const commentId = generateCommentId();
+
 	const commentObject = {
-		id: lastCommentId,
-		content: content,
+		id: commentId,
+		content: commentInput.value,
 		createdAt: "now",
 		score: 0,
 		user: currentUser,
 		replies: []
-	}
+	};
 
-	const newComment = createCommentReplyGroup(commentObject);
+	commentsElement.appendChild(createCommentReplyGroup(commentObject));
+	commentInput.value = "";
 
-	document.querySelector(`#group${comments[comments.length - 1].id}`).insertAdjacentHTML('afterend', newComment);
-	document.querySelector(".comment-input").value = "";
+	comments.set(`commentGroup_${commentId}`, commentObject);
 
-	comments.push(commentObject);
+	scroll();
 
-	localStorage.setItem("comments", JSON.stringify(comments));
-
-	scroll()
+	localStorage.setItem("comments", JSON.stringify(Array.from(comments.entries())));
 
 }
+commentInputForm.querySelector('.send-btn').addEventListener('click', () => {
+	addComment();
+});
 
-const createReplyForm = (id) => `
-<div class="form send-reply-form" id="form${id}">
-	<textarea class="input reply-input" id="input${id}" placeholder="Add a comment..." name="reply input"></textarea>
-	<img class="inputUserImage" src="" alt="user">
-	<button class="btn send-btn" onClick="addReplyComment(${id})">send</button>
-</div>
-`
 
-const createComment = (group, isYou, type) => `
-		<div class="comment" id="comment${group.id}">
-			<div class="comment-header">
-				<img class="sender-img" src="${group.user.image.webp}" alt="sender image">
-				<span class="sender">
-					<span class="sender-name">${group.user.username}</span>	
-					${isYou ? '<span class="you">you</span></span>' : ''}
-				<span class="date">${group.createdAt}</span>
-			</div>
-			<p class="comment-content">
-				${(type === "reply") ? `<span class="reply-to">${group.replyingTo}</span>` : ''}
-				<span class="comment-text">${group.content}</span>
-			</p>
-			${isYou ? `<textarea class="input edit-input" style="width: 100%;" placeholder="Add a comment..." name="comment input"></textarea>` : ''}
-			<div class="vote">
-				<button class="btn-vote upvote" onClick="upvoteComment(${group.id})">+</button>
-				<span class="comment-score">${group.score}</span>
-				<button class="btn-vote downvote" onClick="downvoteComment(${group.id})">-</button>
-			</div>
-			${isYou ? `<button class="btn update" onClick="update(${group.id})">update</button>` : ''}
-			<div class="comment-tools">
-			${isYou ? `
-				<button class="comment-tool delete" onClick="showDeleteModal(${group.id})">
-					<svg width="12" height="14" xmlns="http://www.w3.org/2000/svg">
-						<path d="M1.167 12.448c0 .854.7 1.552 1.555 1.552h6.222c.856 0 1.556-.698 1.556-1.552V3.5H1.167v8.948Zm10.5-11.281H8.75L7.773 0h-3.88l-.976 1.167H0v1.166h11.667V1.167Z" 
-						fill="currentColor"/></svg>
-					<span class="tool-text">Delete</span>
-				</button>
-				<button class="comment-tool edit" onClick="editComment(${group.id})">
-					<svg width="14" height="14" xmlns="http://www.w3.org/2000/svg">
-						<path d="M13.479 2.872 11.08.474a1.75 1.75 0 0 0-2.327-.06L.879 8.287a1.75 1.75 0 0 0-.5 1.06l-.375 3.648a.875.875 0 0 0 .875.954h.078l3.65-.333c.399-.04.773-.216 1.058-.499l7.875-7.875a1.68 1.68 0 0 0-.061-2.371Zm-2.975 2.923L8.159 3.449 9.865 1.7l2.389 2.39-1.75 1.706Z" 
-						fill="currentColor"/></svg>
-					<span class="tool-text">Edit</span>
-				</button> `
-				: `
-				<button class="comment-tool reply" onClick="replyComment(${group.id})">
-						<svg width="14" height="13" xmlns="http://www.w3.org/2000/svg">
-							<path d="M.227 4.316 5.04.16a.657.657 0 0 1 1.085.497v2.189c4.392.05 7.875.93 7.875 5.093 0 1.68-1.082 3.344-2.279 4.214-.373.272-.905-.07-.767-.51 1.24-3.964-.588-5.017-4.829-5.078v2.404c0 .566-.664.86-1.085.496L.227 5.31a.657.657 0 0 1 0-.993Z" 
-							fill="currentColor"/></svg>
-					<span class="tool-text">Reply</span>
-				</button>
-				`
-			}
-			</div>
-			
-		</div>
-		`;
+const formatTimeDifference = (creationDate) => {
+	const timeDifference = Date.now() - creationDate;
 
-		const createCommentReplyGroup = (group) => {
-			if (lastCommentId < group.id) lastCommentId = group.id;
-			let commentReplyGroup = `
-			<div class="comment-replies-group" id="group${group.id}">
-				${createComment(group, group.user.username === currentUser.username, "comment")}
-				<div class="replies">
-					<div class="replies-thread-line"></div>
-					<ul class="replies-comments">
-			`
-			group.replies.forEach(reply => {
-				commentReplyGroup += createComment(reply, reply.user.username === currentUser.username, "reply") 
-				if (lastCommentId < reply.id) lastCommentId = reply.id;
-			});
+	if (timeDifference >= 31536000000) {
+		const years = Math.floor(timeDifference / 31536000000);
+		return `${years} ${years === 1 ? 'year' : 'years'} ago`;
+	} else if (timeDifference >= 2592000000) {
+			const months = Math.floor(timeDifference / 2592000000);
+			return `${months} ${months === 1 ? 'month' : 'months'} ago`;
+	} else if (timeDifference >= 604800000) {
+			const weeks = Math.floor(timeDifference / 604800000);
+			return `${weeks} ${weeks === 1 ? 'week' : 'weeks'} ago`;
+	} else if (timeDifference >= 86400000) {
+			const days = Math.floor(timeDifference / 86400000);
+			return `${days} ${days === 1 ? 'day' : 'days'} ago`;
+	} else if (timeDifference >= 3600000) {
+			const hours = Math.floor(timeDifference / 3600000);
+			return `${hours} ${hours === 1 ? 'hour' : 'hours'} ago`;
+	} else if (timeDifference >= 60000) {
+			const minutes = Math.floor(timeDifference / 60000);
+			return `${minutes} ${minutes === 1 ? 'minute' : 'minutes'} ago`;
+	} else {
+			const seconds = Math.floor(timeDifference / 1000);
+			return `${seconds} ${seconds === 1 ? 'second' : 'seconds'} ago`;
+	}
+}
+const generateCommentId = () => {
+	return Date.now();
+}
 
-			commentReplyGroup +=`
-					</ul>
-				</div>
-			</div>
-			`;
-			return commentReplyGroup;
-		};
+const createReplyForm = (targetComment) => {
+	const formContainer = document.createElement('div');
+	formContainer.classList.add('form', 'send-reply-form');
+
+		const formInput = document.createElement('textarea');
+		formInput.classList.add('input', 'reply-input');
+		formInput.placeholder = "Add a comment...";
+
+		const image = document.createElement('img');
+		image.classList.add('inputUserImage');
+		image.src = currentUser.image.webp;
+		image.alt = "user image";
+
+		const btnSend = document.createElement('button');
+		btnSend.classList.add('btn', 'send-btn');
+		btnSend.textContent = "send";
+
+	formContainer.appendChild(formInput);
+	formContainer.appendChild(image);
+	formContainer.appendChild(btnSend);
+
+	btnSend.addEventListener('click', () => {
+		targetComment.querySelector('.reply .tool-text').textContent = "Reply";
+		if (formInput.value === ''){
+			formContainer.remove();
+			return;
+		}
+		addReplyComment(targetComment, formContainer, formInput.value);
+	});
+
+	return formContainer;
+}
+
+
+const btnReplyTemplate = document.getElementById("btn-reply-template")
+const btnEditDeleteTemplate = document.getElementById("btn-edit-delete-template")
+const createComment = (commentData, isYou, type) => {
+	const commentContainer = document.createElement('div');
+	commentContainer.classList.add('comment');
+	commentContainer.id = `comment_${commentData.id}`;
+
+		const header = document.createElement('div');
+		header.classList.add('comment-header');
+
+			const headerImage = document.createElement('img');
+			headerImage.classList.add('sender-img');
+			headerImage.src = commentData.user.image.webp;
+			headerImage.alt = 'user image';
+
+			const senderName = document.createElement('span');
+			senderName.classList.add('sender-name');
+			senderName.textContent = commentData.user.username;
+
+			const date = document.createElement('span');
+			date.classList.add('date');
+			date.textContent = commentData.createdAt;
+
+			header.appendChild(headerImage);
+			header.appendChild(senderName);
+			header.appendChild(date);
+
+		const content = document.createElement('p');
+		content.classList.add('comment-content');
+
+			const contentText = document.createElement('span');
+			contentText.classList.add('comment-text');
+			contentText.innerText = commentData.content;
+
+			content.appendChild(contentText);
+		
+		const voteContainer = document.createElement('div');
+		voteContainer.classList.add('vote');
+
+			const btnUpvote = document.createElement('button');
+			btnUpvote.classList.add('btn-vote', 'upvote');
+			btnUpvote.textContent = '+';
+
+			const score = document.createElement('span');
+			score.classList.add('comment-score');
+			score.textContent = commentData.score;
+
+			const btnDownvote = document.createElement('button');
+			btnDownvote.classList.add('btn-vote', 'downvote');
+			btnDownvote.textContent = '-';
+
+			voteContainer.appendChild(btnUpvote);
+			voteContainer.appendChild(score);
+			voteContainer.appendChild(btnDownvote);
+
+		commentContainer.appendChild(header);
+		commentContainer.appendChild(content);
+		commentContainer.appendChild(voteContainer);
+
+	if (type === "reply") {
+		const replyTo = document.createElement('span');
+		replyTo.classList.add('reply-to');
+		replyTo.textContent = commentData.replyingTo + ", ";
+		replyTo.contentEditable = "false";
+		content.insertBefore(replyTo, contentText);
+	}
+	if (isYou) {
+		
+		const youLabel = document.createElement('span');
+		youLabel.classList.add('you');
+		youLabel.textContent = 'you';
+		header.insertBefore(youLabel, senderName.nextSibling);
+
+		const commentTools = btnEditDeleteTemplate.content.cloneNode(true);
+		commentContainer.appendChild(commentTools);
+
+	} else {
+		const commentTools = btnReplyTemplate.content.cloneNode(true);
+		commentContainer.appendChild(commentTools);
+	}
+
+	return commentContainer;
+
+};
+const createCommentReplyGroup = (group) => {
+	const groupContainer = document.createElement('div');
+	groupContainer.classList.add('comment-replies-group');
+	groupContainer.id = `commentGroup_${group.id}`;
+
+		const mainComment = createComment(group, group.user.username === currentUser.username, "comment");
+
+		const repliesContainer = document.createElement('div');
+		repliesContainer.classList.add('replies');
+
+			const repliesThreadLine = document.createElement('div');
+			repliesThreadLine.classList.add('replies-thread-line');
+
+			const repliesComments = document.createElement('div');
+			repliesComments.classList.add('replies-comments');
+
+				group.replies.forEach(reply => {
+					repliesComments.appendChild(createComment(reply, reply.user.username === currentUser.username, "reply"));
+				});
+
+		repliesContainer.appendChild(repliesThreadLine);
+		repliesContainer.appendChild(repliesComments);
+
+	groupContainer.appendChild(mainComment);
+	groupContainer.appendChild(repliesContainer);
+
+	return groupContainer;
+}
 
 function scroll() {
 	commentsElement.scrollTop = commentsElement.scrollHeight;
@@ -350,22 +425,20 @@ fetch("./data.json")
 
 	const localComments = localStorage.getItem("comments");
 	if (localComments === null) {
-		comments = jsonData.comments;
-		localStorage.setItem("comments", JSON.stringify(comments));
+		jsonData.comments.forEach(commentGroup => {
+			comments.set(`commentGroup_${commentGroup.id}`, commentGroup);
+			commentsElement.appendChild(createCommentReplyGroup(commentGroup));
+		});
+		localStorage.setItem("comments", JSON.stringify(Array.from(comments.entries())));
 	} else {
-		comments = JSON.parse(localComments);
+		comments = new Map(JSON.parse(localComments));
+		for (let commentGroup of comments.values()) {
+			commentsElement.appendChild(createCommentReplyGroup(commentGroup));
+		}
 	}
 	
 	document.querySelector(".inputUserImage").src = currentUser.image.webp;
-	
-	comments.forEach(comment => {
-		commentsElement.innerHTML += createCommentReplyGroup(comment);
-	});
 
 	scroll();
 
 });
-
-
-
-
